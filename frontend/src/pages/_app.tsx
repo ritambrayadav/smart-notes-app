@@ -1,12 +1,23 @@
-import '@/styles/globals.css';
-import type { AppProps } from 'next/app';
-import { Provider } from 'react-redux';
-import store from '@/redux/store';
+import "@/styles/globals.css";
+import type { AppProps } from "next/app";
+import { Provider } from "react-redux";
+import { store } from "@/redux/store";
+import AuthGuard from "@/components/AuthGaurd";
 
-export default function App({ Component, pageProps }: AppProps) {
+const protectedRoutes = ["/dashboard", "/notes", "/profile"];
+
+export default function App({ Component, pageProps, router }: AppProps) {
+  const isProtected = protectedRoutes.includes(router.pathname);
+
   return (
     <Provider store={store}>
-      <Component {...pageProps} />
+      {isProtected ? (
+        <AuthGuard>
+          <Component {...pageProps} />
+        </AuthGuard>
+      ) : (
+        <Component {...pageProps} />
+      )}
     </Provider>
   );
 }
