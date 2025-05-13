@@ -1,5 +1,6 @@
 import axiosInstance from "./api";
 
+const PATH = "/api/auth";
 interface SignupData {
   name: string;
   email: string;
@@ -12,11 +13,11 @@ interface LoginData {
 }
 
 export const signup = async (data: SignupData) => {
-  const res = await axiosInstance.post("/signup", data);
+  const res = await axiosInstance.post(`${PATH}/register`, data);
   return res.data;
 };
 
 export const login = async (data: LoginData) => {
-  const res = await axiosInstance.post("/login", data);
+  const res = await axiosInstance.post(`${PATH}/login`, data);
   return res.data;
 };
