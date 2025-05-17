@@ -3,6 +3,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
+import noteRoutes from "./routes/notesRoutes.js";
 import errorHandler from "./middlewares/errorMiddleware.js";
 dotenv.config();
 const app = express();
@@ -17,6 +18,8 @@ app.get("/", (req, res) => {
   res.send("Backend is Running!");
 });
 app.use("/api/auth", authRoutes);
+app.use("/api/notes", noteRoutes);
+
 app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

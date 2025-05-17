@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { signup } from "@/api/auth";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
+import LinkText from "@/components/LinkText";
 
 const Signup = () => {
   const router = useRouter();
@@ -25,6 +28,7 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
     try {
       await signup(userData);
       setUserData({ userName: "", email: "", password: "" });
@@ -39,55 +43,41 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-4">Register</h2>
-
-        {error && (
-          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
-        )}
+        <h2 className="text-2xl font-bold text-center mb-6">Register here</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
+          <Input
             type="text"
             name="userName"
             placeholder="Name"
-            className="w-full p-3 border rounded-md"
             value={userData.userName}
             onChange={handleChange}
             required
           />
-          <input
+          <Input
             type="email"
             name="email"
             placeholder="Email"
-            className="w-full p-3 border rounded-md"
             value={userData.email}
             onChange={handleChange}
             required
           />
-          <input
+          <Input
             type="password"
             name="password"
             placeholder="Password"
-            className="w-full p-3 border rounded-md"
             value={userData.password}
             onChange={handleChange}
             required
           />
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 disabled:opacity-60"
-            disabled={loading}
-          >
+          <Button type="submit" disabled={loading}>
             {loading ? "Registering..." : "Register"}
-          </button>
+          </Button>
         </form>
 
         <p className="text-center mt-4 text-sm">
-          Already have an account?{" "}
-          <a href="/login" className="text-blue-600 underline">
-            Login Here
-          </a>
+          Already have an account? <LinkText href="/login">Login Here</LinkText>
         </p>
       </div>
     </div>

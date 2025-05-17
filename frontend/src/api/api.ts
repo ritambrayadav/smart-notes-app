@@ -1,9 +1,9 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 import { store } from "@/redux/store";
 import { logout } from "@/redux/slices/authSlice";
-
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -32,6 +32,7 @@ axiosInstance.interceptors.response.use(
       error.response?.data?.message ||
       error.message ||
       "Something went wrong. Please try again.";
+    toast.error(message);
     return Promise.reject(new Error(message));
   }
 );
