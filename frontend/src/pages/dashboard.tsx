@@ -1,10 +1,9 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { RootState } from "@/redux/store";
-import { fetchAllNotes, searchNotes } from "@/api/notes";
+import { fetchAllNotes, searchNotes, deleteNode } from "@/api/notes";
 import { markOnboardingSeen, fetchUserByIdAndDispatch } from "@/api/auth";
 import OnboardingModal from "@/components/OnboardingModal";
 import DashboardGreeting from "@/components/DashboardGreeting";
@@ -18,35 +17,26 @@ import LoadingNotesMessage from "@/components/LoadingNotesMessage";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-
-  const { notes, loading, totalCount } = useSelector(
-    (state: RootState) => state.notes
-  );
+  const { notes, loading } = useSelector((state: RootState) => state.notes);
   const { user, fetchedUser } = useSelector((state: RootState) => state.auth);
-
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-  const [limit] = useState<number>(6);
-
-  const totalPages = Math.ceil(totalCount / limit);
-
-  // 🔍 Fetch Notes on load and on page change or search
+  const [limit] = useState<number>(5);
+  const totalPages = Math.ceil(notes?.totalPages / limit);
+  console.log(notes, "notesss");
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.userId) return;
-
       if (searchQuery.trim() !== "") {
-        await searchNotes(dispatch, searchQuery, page, limit);
+        await searchNotes(page, limit, searchQuery);
       } else {
-        await fetchAllNotes(dispatch, page, limit);
+        await fetchAllNotes(page, limit);
       }
     };
-
     fetchData();
   }, [dispatch, page, limit, searchQuery, user?.userId]);
 
-  // 👤 Fetch user once
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -68,7 +58,7 @@ const Dashboard = () => {
   }, [fetchedUser]);
 
   const handleOnboardingClose = async () => {
-    await markOnboardingSeen(dispatch);
+    await markOnboardingSeen();
     setShowOnboarding(false);
   };
 
@@ -76,50 +66,55 @@ const Dashboard = () => {
     router.push("/notes/create-update");
   };
 
-  const handleEditNote = (noteId: string) => {
-    router.push(`/notes/edit/${noteId}`);
+  const handleEditNote = (noteId: string | null | undefined) => {
+    router.push(`/notes/create-update?noteId=${noteId}`);
+  };
+  const handleDelete = async (noteId: string | null | undefined) => {
+    deleteNode(noteId);
+    await fetchAllNotes(page, limit);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setPage(1); 
+    setPage(1);
   };
 
+  console.log(page, "page", notes, "notes");
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4 md:px-8">
       <div className="max-w-5xl mx-auto">
-        {/* {showOnboarding && <OnboardingModal onClose={handleOnboardingClose} />} */}
-
+        {showOnboarding && <OnboardingModal onClose={handleOnboardingClose} />}
         <DashboardGreeting userName={user?.userName} />
-
-        <NoteSearchInput
-          searchQuery={searchQuery}
-          handleSearchChange={handleSearchChange}
-        />
-
-        <NotesTopBar
-          totalNotes={totalCount}
-          filteredCount={notes.length}
-          handleCreateNote={handleCreateNote}
-        />
-
-        {loading && <LoadingNotesMessage />}
-        {!loading && notes.length === 0 && <NoNotesMessage />}
-
-        {!loading &&
-          notes.map((note) => (
-            <NotesGrid
-              key={note.noteId}
-              notes={note}
-              handleEditNote={handleEditNote}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center mt-5 ">
+          <div className="w-full sm:w-1/5">
+            <NotesTopBar
+              totalNotes={totalPages}
+              filteredCount={notes?.notes?.length}
+              handleCreateNote={handleCreateNote}
             />
-          ))}
+          </div>
+          <div className="w-full sm:w-4/5">
+            <NoteSearchInput
+              searchQuery={searchQuery}
+              handleSearchChange={handleSearchChange}
+            />
+          </div>
+        </div>
+        {loading && <LoadingNotesMessage />}
+        {!loading && notes?.notes?.length === 0 && <NoNotesMessage />}
 
-        {!loading && totalPages > 1 && (
+        {!loading && (
+          <NotesGrid
+            notes={notes?.notes}
+            onEdit={handleEditNote}
+            onDelete={handleDelete}
+          />
+        )}
+        {!loading && totalPages >= 1 && (
           <PaginationControls
             page={page}
             totalPages={totalPages}
-            // setPage={setPage}
+            setPage={setPage}
           />
         )}
       </div>

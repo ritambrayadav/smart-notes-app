@@ -15,7 +15,6 @@ const Signup = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData((prev) => ({
@@ -27,14 +26,13 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
     try {
       await signup(userData);
       setUserData({ userName: "", email: "", password: "" });
       router.push("/login");
     } catch (err: any) {
-      setError(err.message || "Registration failed");
+      console.log(err.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -43,7 +41,7 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Register here</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">Sign up here</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -71,13 +69,13 @@ const Signup = () => {
             required
           />
 
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Registering..." : "Register"}
           </Button>
         </form>
 
         <p className="text-center mt-4 text-sm">
-          Already have an account? <LinkText href="/login">Login Here</LinkText>
+          Already have an account? <LinkText href="/login"> Login Here</LinkText>
         </p>
       </div>
     </div>

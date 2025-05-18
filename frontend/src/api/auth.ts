@@ -10,36 +10,21 @@ import {
   updateOnBoardingSeenFailure,
 } from "@/redux/slices/authSlice";
 import { AppDispatch } from "@/redux/store";
-interface SignupData {
-  name: string;
-  email: string;
-  password: string;
-}
+import { SignupData, LoginData, AuthResponse } from "@/utils/interface";
+import { AxiosError } from "axios";
+import { toast } from "react-toastify";
+import { store } from "@/redux/store";
 
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-interface AuthResponse {
-  token: string;
-  user: {
-    id: string;
-    userName: string;
-    email: string;
-    hasSeenOnboarding: boolean;
-  };
-}
-
-export const signup = async (data: SignupData): Promise<AuthResponse> => {
+export const signup = async (data: SignupData): Promise<SignupData> => {
   try {
-    const res = await axiosInstance.post<AuthResponse>(
+    const res = await axiosInstance.post<SignupData>(
       `${PATH.auth}/signup`,
       data
     );
     return res.data;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Signup failed");
+  } catch (error) {
+    const err = error as AxiosError<{ message: string }>;
+    throw new Error(err?.response?.data?.message || "Signup failed");
   }
 };
 
@@ -50,8 +35,9 @@ export const login = async (data: LoginData): Promise<AuthResponse> => {
       data
     );
     return res.data;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Login failed");
+  } catch (error) {
+    const err = error as AxiosError<{ message: string }>;
+    throw new Error(err?.response?.data?.message || "Login failed");
   }
 };
 export const fetchUserByIdAndDispatch = async (dispatch: AppDispatch) => {
@@ -69,13 +55,15 @@ export const fetchUserByIdAndDispatch = async (dispatch: AppDispatch) => {
     throw error;
   }
 };
-export const markOnboardingSeen = async (dispatch: AppDispatch) => {
+export const markOnboardingSeen = async () => {
+  const dispatch = store.dispatch;
   const user = getSessionItem("user");
   try {
     dispatch(updateOnBoardingSeenStart());
-    const res = await axiosInstance.put<{ success: boolean }>(
+    const res = await axiosInstance.put<{ message: string }>(
       `${PATH.auth}/${user?.userId}`
     );
+    toast.success(res.data.message);
     dispatch(updateOnBoardingSeenSuccess());
   } catch (error: any) {
     dispatch(

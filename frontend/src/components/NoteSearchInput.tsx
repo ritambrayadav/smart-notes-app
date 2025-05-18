@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useMemo, useCallback, useEffect } from "react";
+import { debounce } from "lodash";
 import Input from "./Input";
 
 interface NoteSearchInputProps {
@@ -9,15 +10,36 @@ interface NoteSearchInputProps {
 const NoteSearchInput: React.FC<NoteSearchInputProps> = ({
   searchQuery,
   handleSearchChange,
-}) => (
-  <div className="mb-6">
-    <Input
-      type="text"
-      value={searchQuery}
-      onChange={handleSearchChange}
-      placeholder="Search by title, tags or description"
-    />
-  </div>
-);
+}) => {
+  const debouncedChangeHandler = useMemo(
+    () => debounce(handleSearchChange, 300),
+    [handleSearchChange]
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedChangeHandler.cancel();
+    };
+  }, [debouncedChangeHandler]);
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      e.persist();
+      debouncedChangeHandler(e);
+    },
+    [debouncedChangeHandler]
+  );
+
+  return (
+    <div className="mb-6">
+      <Input
+        type="text"
+        defaultValue={searchQuery}
+        onChange={handleChange}
+        placeholder="Search by title, tags or description"
+      />
+    </div>
+  );
+};
 
 export default NoteSearchInput;

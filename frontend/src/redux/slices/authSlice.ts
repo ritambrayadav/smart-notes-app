@@ -1,32 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import {
-  getSessionItem,
-  setSessionItem,
-  removeSessionItem,
-} from "@/utils/sessionStorage";
-export interface DecodedUser {
-  userId: string;
-  userName: string;
-  email: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AuthPayload {
-  token: string;
-  user: DecodedUser | null;
-}
-
-interface AuthState {
-  user: DecodedUser | null;
-  token: string | null;
-  fetchedUser: DecodedUser | null;
-  loading: boolean;
-  error: string | null;
-}
+import { getSessionItem, setSessionItem } from "@/utils/sessionStorage";
+import { AuthState, User, AuthPayload } from "@/utils/interface";
 
 const initialState: AuthState = {
-  user: getSessionItem<DecodedUser>("user"),
+  user: getSessionItem<User>("user"),
   token: getSessionItem<string>("token"),
   fetchedUser: null,
   loading: false,
@@ -47,17 +24,11 @@ const authSlice = createSlice({
         setSessionItem("token", token);
       }
     },
-    logout(state) {
-      state.user = null;
-      state.token = null;
-      removeSessionItem("user");
-      removeSessionItem("token");
-    },
     getUserByIdStart(state) {
       state.loading = true;
       state.error = null;
     },
-    getUserByIdSuccess(state, action: PayloadAction<DecodedUser>) {
+    getUserByIdSuccess(state, action: PayloadAction<User>) {
       state.fetchedUser = action.payload;
       state.loading = false;
     },
@@ -69,8 +40,8 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    updateOnBoardingSeenSuccess(state, action: PayloadAction<DecodedUser>) {
-      state.fetchedUser = action.payload;
+    updateOnBoardingSeenSuccess(state) {
+      state.error = null;
       state.loading = false;
     },
     updateOnBoardingSeenFailure(state, action: PayloadAction<string>) {
@@ -82,7 +53,6 @@ const authSlice = createSlice({
 
 export const {
   setUser,
-  logout,
   getUserByIdStart,
   getUserByIdSuccess,
   getUserByIdFailure,

@@ -13,7 +13,6 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const [userData, setUserData] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const user = useSelector((state: RootState) => state.auth.user);
@@ -33,7 +32,6 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
@@ -41,7 +39,7 @@ const Login = () => {
       dispatch(setUser({ user: res.user, token: res.token }));
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Login failed.");
+      console.log(err.message || "Login failed.");
     } finally {
       setLoading(false);
     }
@@ -82,15 +80,14 @@ const Login = () => {
               required
             />
           </div>
-
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
 
         <p className="text-center mt-6 text-sm text-gray-600">
-          Don&apos;t have an account?{" "}
-          <LinkText href="/signup">Register Here</LinkText>
+          Don&apos;t have an account?
+          <LinkText href="/signup"> Sign up Here</LinkText>
         </p>
       </div>
     </div>

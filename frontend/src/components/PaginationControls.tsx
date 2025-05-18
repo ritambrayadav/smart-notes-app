@@ -6,6 +6,7 @@ interface PaginationControlsProps {
   totalPages: number;
   onPrev?: () => void;
   onNext?: () => void;
+  setPage: (page: number) => void;
 }
 
 const PaginationControls: React.FC<PaginationControlsProps> = ({
@@ -13,18 +14,37 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
   totalPages,
   onPrev,
   onNext,
-}) => (
-  <div className="flex justify-center items-center gap-4 mt-10">
-    <Button onClick={onPrev} disabled={page === 1}>
-      Prev
-    </Button>
-    <span className="text-sm text-gray-700">
-      Page {page} of {totalPages}
-    </span>
-    <Button onClick={onNext} disabled={page === totalPages}>
-      Next
-    </Button>
-  </div>
-);
+  setPage,
+}) => {
+  const handlePrev = () => {
+    if (onPrev) {
+      onPrev();
+    } else if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (onNext) {
+      onNext();
+    } else if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
+
+  return (
+    <div className="flex justify-center items-center gap-4 mt-10">
+      <Button onClick={handlePrev} disabled={page === 1}>
+        Prev
+      </Button>
+      <span className="text-sm text-gray-700">
+        Page {page} of {totalPages}
+      </span>
+      <Button onClick={handleNext} disabled={page === totalPages}>
+        Next
+      </Button>
+    </div>
+  );
+};
 
 export default PaginationControls;

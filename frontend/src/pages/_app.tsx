@@ -2,9 +2,12 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { Provider } from "react-redux";
 import { store } from "@/redux/store";
-import AuthGuard from "@/components/AuthGaurd";
+const AuthGuard = dynamic(() => import("@/components/AuthGaurd"), {
+  ssr: false,
+});
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import dynamic from "next/dynamic";
 
 const protectedRoutes = ["/dashboard", "/notes"];
 

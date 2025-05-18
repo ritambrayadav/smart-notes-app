@@ -1,18 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
-
 import { RootState, AppDispatch } from "@/redux/store";
 import { createNewNote, updateNote, getNoteById } from "@/api/notes";
 import { fetchSuggestedTags } from "@/api/notes";
-import { clearSuggestedTags } from "@/redux/slices/notesSlice";
+import { clearSuggestedTags, clearSingleNote } from "@/redux/slices/notesSlice";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import TextAreaInput from "@/components/TextAreaInput";
 
-// simple debounce hook
 function useDebounce<T>(value: T, delay = 500): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -25,15 +23,11 @@ function useDebounce<T>(value: T, delay = 500): T {
 const CreateEditNote = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const searchParams = useSearchParams();
-  const noteId = searchParams.get("id");
-
-  const { user } = useSelector((state: RootState) => state.auth);
-
+  const { noteId } = router.query;
+  const { singleNote } = useSelector((state: RootState) => state.notes);
   const { suggestedTags, suggestLoading, suggestError } = useSelector(
     (state: RootState) => state.notes
   );
-
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -42,27 +36,35 @@ const CreateEditNote = () => {
   });
 
   const debouncedContent = useDebounce(form.content, 800);
-
-  // load existing note in edit mode
   useEffect(() => {
-    if (!noteId) return;
+    if (!router.isReady) return;
+    if (noteId) {
+      getNoteById(noteId as string);
+    } else {
+      dispatch(clearSingleNote());
+      setForm({
+        title: "",
+        content: "",
+        tagInput: "",
+        tags: [],
+      });
+    }
 
-    getNoteById(noteId).then((data) =>
+    dispatch(clearSuggestedTags());
+  }, [router.isReady, noteId, dispatch]);
+
+  useEffect(() => {
+    if (noteId && singleNote) {
       setForm((f) => ({
         ...f,
-        title: data.title,
-        content: data.content,
-        tags: data.tags || [],
-      }))
-    );
-
-    // clear suggestions when editing
-    dispatch(clearSuggestedTags());
-  }, [noteId, dispatch]);
-
-  // fetch suggested tags when creating and content is long enough
+        title: singleNote.title ?? "",
+        content: singleNote.content ?? "",
+        tags: singleNote.tags ?? [],
+      }));
+    }
+  }, [singleNote]);
   useEffect(() => {
-    if (noteId || debouncedContent.trim().length < 10) {
+    if (debouncedContent.trim().length < 10) {
       dispatch(clearSuggestedTags());
     } else {
       fetchSuggestedTags(dispatch, debouncedContent);
@@ -96,15 +98,15 @@ const CreateEditNote = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const noteData = {
-      title: form.title,
+      title: form?.title,
       content: form.content,
       tags: form.tags,
     };
     try {
       if (noteId) {
-        await updateNote(noteId, noteData);
+        await updateNote(noteId as string, noteData);
       } else {
-        await createNewNote(dispatch, noteData);
+        await createNewNote(noteData);
       }
       router.push("/dashboard");
     } catch (err) {
@@ -115,13 +117,13 @@ const CreateEditNote = () => {
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-semibold mb-6">
-        {noteId ? "Edit Note" : "Create Note"}
+        {noteId ? "Edit note" : "Create new note"}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
           placeholder="Title"
-          value={form.title}
+          value={form?.title}
           onChange={(e) => handleChange("title", e.target.value)}
           required
         />
@@ -133,8 +135,6 @@ const CreateEditNote = () => {
           className="h-40"
           required
         />
-
-        {/* Manual Tags */}
         <div>
           <label className="block mb-1 font-medium">Tags</label>
           <div className="flex space-x-2 mb-3">
@@ -167,41 +167,36 @@ const CreateEditNote = () => {
             ))}
           </div>
         </div>
+        <div>
+          <label className="block mb-1 font-medium">You might add</label>
 
-        {/* Suggested Tags */}
-        {!noteId && (
-          <div>
-            <label className="block mb-1 font-medium">You might add</label>
+          {suggestLoading && (
+            <p className="text-sm text-gray-500">Loading suggestions…</p>
+          )}
+          {suggestError && (
+            <p className="text-sm text-red-500">{suggestError}</p>
+          )}
+          {!suggestLoading && !suggestError && suggestedTags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {suggestedTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => handleAddTag(tag)}
+                  className="bg-gray-200 hover:bg-gray-300 text-sm px-2 py-1 rounded"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
 
-            {suggestLoading && (
-              <p className="text-sm text-gray-500">Loading suggestions…</p>
-            )}
-            {suggestError && (
-              <p className="text-sm text-red-500">{suggestError}</p>
-            )}
-            {!suggestLoading && !suggestError && suggestedTags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {suggestedTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => handleAddTag(tag)}
-                    className="bg-gray-200 hover:bg-gray-300 text-sm px-2 py-1 rounded"
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {!suggestLoading && !suggestError && suggestedTags.length === 0 && (
-              <p className="text-sm text-gray-400">
-                Type more content to see suggestions
-              </p>
-            )}
-          </div>
-        )}
-
+          {!suggestLoading && !suggestError && suggestedTags.length === 0 && (
+            <p className="text-sm text-gray-400">
+              Type more content to see suggestions
+            </p>
+          )}
+        </div>
         <div className="pt-4 text-right">
           <Button type="submit">
             {noteId ? "Update Note" : "Create Note"}

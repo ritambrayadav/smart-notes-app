@@ -13,9 +13,6 @@ const NotesTopBar: React.FC<NotesTopBarProps> = ({
   handleCreateNote,
 }) => (
   <div className="flex items-center justify-between mb-6">
-    <p className="text-sm text-gray-500">
-      Showing {filteredCount} of {totalNotes} notes
-    </p>
     <Button onClick={handleCreateNote}>+ Create Note</Button>
   </div>
 );

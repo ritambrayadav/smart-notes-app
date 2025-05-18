@@ -9,8 +9,16 @@ import {
   suggestTagsStart,
   suggestTagsSuccess,
   suggestTagsFailure,
+  searchNotesStart,
+  searchNotesSuccess,
+  searchNotesFailure,
+  getNoteStart,
+  getNoteSuccess,
+  getNoteFailure,
 } from "@/redux/slices/notesSlice";
 import { AppDispatch } from "@/redux/store";
+import { store } from "@/redux/store";
+import { toast } from "react-toastify";
 export interface DashboardData {
   user: {
     name: string;
@@ -28,21 +36,16 @@ export interface NoteInput {
   content: string;
   summary?: string;
 }
-export const fetchAllNotes = async (
-  dispatch: AppDispatch,
-  page = 1,
-  limit = 10
-) => {
+export const fetchAllNotes = async (page = 1, limit = 10) => {
+  const dispatch = store.dispatch;
   const userId = getSessionItem("user")?.userId;
-
   try {
     dispatch(fetchNotesStart());
-
     const res = await axiosInstance.get(
       `${PATH.notes}/${userId}?page=${page}&limit=${limit}`
     );
 
-    dispatch(fetchNotesSuccess(res.data.notes));
+    dispatch(fetchNotesSuccess(res.data));
   } catch (error: any) {
     dispatch(
       fetchNotesFailure(error?.response?.data?.error || "Failed to fetch notes")
@@ -50,12 +53,9 @@ export const fetchAllNotes = async (
   }
 };
 
-// 2️⃣ Create Note
-export const createNewNote = async (
-  dispatch: AppDispatch,
-  noteData: NoteInput
-) => {
+export const createNewNote = async (noteData: NoteInput) => {
   const userId = getSessionItem("user")?.userId;
+  const dispatch = store.dispatch;
 
   try {
     const res = await axiosInstance.post(`${PATH.notes}/${userId}`, {
@@ -63,49 +63,49 @@ export const createNewNote = async (
       ...noteData,
     });
 
-    dispatch(addNote(res.data.note)); // Make sure your backend sends back { note: {} }
+    dispatch(addNote(res.data.note));
   } catch (error) {
     console.error("Failed to create note", error);
-    // Optionally dispatch an error reducer or show toast
   }
 };
 export const updateNote = async (
-  id: string,
+  noteId: string,
   noteData: {
     title: string;
     content: string;
     tags: string[];
   }
 ) => {
-  const token = localStorage.getItem("token");
-  const response = await axiosInstance.put(`${PATH.notes}/${id}`, noteData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-export const getNoteById = async (): Promise<DashboardData> => {
-  const res = await axiosInstance.get(`${PATH.notes}/:id`);
+  const res = await axiosInstance.put(`${PATH.notes}/${noteId}`, noteData);
+  toast.success(res.data.message);
   return res.data;
 };
-export const searchNotes = async (
-  dispatch: AppDispatch,
-  page = 1,
-  limit = 10,
-  query
-) => {
-  const userId = getSessionItem("user")?.userId;
-
+export const getNoteById = async (noteId: string) => {
+  const dispatch = store.dispatch;
   try {
-    dispatch(fetchNotesStart());
-
+    dispatch(getNoteStart());
+    const res = await axiosInstance.get(`${PATH.notes}/get-note/${noteId}`);
+    dispatch(getNoteSuccess(res.data.note));
+  } catch (error: any) {
+    dispatch(
+      getNoteFailure(error?.response?.data?.message || "Failed to fetch note")
+    );
+  }
+};
+export const searchNotes = async (page = 1, limit = 5, query: string) => {
+  const dispatch = store.dispatch;
+  const userId = getSessionItem("user")?.userId;
+  try {
+    dispatch(searchNotesStart());
     const res = await axiosInstance.get(
       `${PATH.notes}/search/${userId}?page=${page}&limit=${limit}&query=${query}`
     );
-
-    dispatch(fetchNotesSuccess(res.data.notes));
+    dispatch(searchNotesSuccess(res.data));
   } catch (error: any) {
     dispatch(
-      fetchNotesFailure(error?.response?.data?.error || "Failed to fetch notes")
+      searchNotesFailure(
+        error?.response?.data?.error || "Failed to fetch notes"
+      )
     );
   }
 };
@@ -126,4 +126,11 @@ export const fetchSuggestedTags = async (
       err.response?.data?.message || err.message || "Failed to suggest tags";
     dispatch(suggestTagsFailure(message));
   }
+};
+export const deleteNode = async (
+  noteId: string | null | undefined
+): Promise<DashboardData> => {
+  const res = await axiosInstance.delete(`${PATH.notes}/${noteId}`);
+  toast.error(res.data.message);
+  return res.data;
 };

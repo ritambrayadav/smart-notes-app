@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 import { store } from "@/redux/store";
-import { logout } from "@/redux/slices/authSlice";
+import { logout } from "@/utils/logout";
 const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   headers: {
@@ -23,11 +23,9 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      store.dispatch(logout());
-      window.location.href = "/login";
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      logout();
     }
-
     const message =
       error.response?.data?.message ||
       error.message ||

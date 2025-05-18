@@ -1,5 +1,5 @@
 import React from "react";
 
-const LoadingNotesMessage: React.FC = () => <p>Loading notes...</p>;
+const LoadingMessage: React.FC = () => <p>Loading...</p>;
 
-export default LoadingNotesMessage;
+export default LoadingMessage;

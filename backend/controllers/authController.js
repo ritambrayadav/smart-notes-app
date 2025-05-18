@@ -98,7 +98,7 @@ const markOnboardingSeen = async (req, res) => {
     });
 
     res.status(200).json({
-      message: "Onboarding marked as seen",
+      message: "Onboarded successfully",
     });
   } catch (error) {
     console.error("Failed to update onboarding status:", error);

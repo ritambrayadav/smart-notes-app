@@ -12,18 +12,14 @@ export const createNote = async (req, res) => {
     //   return res.status(400).json({ error: "Title and content are required." });
     // }
 
-    // Generate tags if none provided
-    // const finalTags = tags.length ? tags : await suggestTagsFromContent(content);
-    const summary = await generateSummaryFromContent(content);
-    // Create note
+    const summery = await generateSummaryFromContent(content);
     const newNote = await Note.create({
       noteId: uuidv4(),
       userId,
       title,
       content,
-      summary,
-      tags: tags.length > 0 ? tags : tags,
-      createdAt: new Date(),
+      summery,
+      tags: tags.length > 0 ? tags : [],
     });
 
     return res.status(201).json({ note: newNote });
@@ -37,7 +33,7 @@ export const getNotes = async (req, res) => {
   try {
     const userId = req.params.userId;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 5;
 
     let lastKey = req.query.lastKey ? JSON.parse(req.query.lastKey) : null;
 
@@ -48,7 +44,6 @@ export const getNotes = async (req, res) => {
       .exec();
     const totalPages = totalNotesResult.count;
 
-    // Step 2: Paginated query
     let query = Note.query("userId")
       .eq(userId)
       .using("userId-index")
@@ -75,84 +70,72 @@ export const getNotes = async (req, res) => {
   }
 };
 
-// export const updateNote = async (req, res) => {
-//   try {
-//     const noteId = req.params.id;
-//     const { title, content, tags } = req.body;
-
-//     const summary = await generateSummary(content);
-
-//     const updatedNote = await Note.findByIdAndUpdate(
-//       noteId,
-//       {
-//         title,
-//         content,
-//         summary,
-//         tags,
-//         updatedAt: new Date(),
-//       },
-//       { new: true }
-//     );
-
-//     if (!updatedNote) {
-//       return res.status(404).json({ message: "Note not found" });
-//     }
-
-//     res.status(200).json(updatedNote);
-//   } catch (err) {
-//     res.status(500).json({ message: "Error updating note", error: err });
-//   }
-// };
-export const searchNotes = async (req, res) => {
-  const { query } = req.query;
-  const userId = req.params.userId;
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const lastKey = req.query.lastKey ? JSON.parse(req.query.lastKey) : null;
-
+export const updateNote = async (req, res) => {
   try {
-    let scan = Note.scan("userId").eq(userId);
+    const noteId = req.params.noteId;
+    const { title, content, tags } = req.body;
 
-    if (lastKey) {
-      scan = scan.startAt(lastKey);
+    const summary = await generateSummaryFromContent(content);
+
+    const note = await Note.get(noteId);
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
     }
 
-    scan = scan.limit(limit);
+    note.title = title;
+    note.content = content;
+    note.summery = summary;
+    note.tags = tags;
 
-    const result = await scan.exec();
-    let notes = result;
+    await note.save(); 
+
+    res.status(200).json({
+      message: "Note updated successfully",
+      note,
+    });
+  } catch (err) {
+    console.error("Error updating note:", err);
+    res
+      .status(500)
+      .json({ message: "Error updating note", error: err.message });
+  }
+};
+
+export const searchNotes = async (req, res) => {
+  const { query, page = 1, limit = 10 } = req.query;
+  const userId = req.params.userId;
+
+  try {
+    const allNotesResult = await Note.scan("userId").eq(userId).exec();
+
+    let filteredNotes = allNotesResult;
+
     if (query) {
       const q = query.toLowerCase();
-      notes = notes.filter(
-        (note) =>
+      filteredNotes = allNotesResult.filter((note) => {
+        return (
           (note.title && note.title.toLowerCase().includes(q)) ||
           (note.description && note.description.toLowerCase().includes(q)) ||
           (Array.isArray(note.tags) &&
             note.tags.some((tag) => tag.toLowerCase().includes(q)))
-      );
+        );
+      });
     }
-    const allNotesResult = await Note.scan("userId").eq(userId).exec();
-    const filteredTotalCount = query
-      ? allNotesResult.filter(
-          (note) =>
-            (note.title &&
-              note.title.toLowerCase().includes(query.toLowerCase())) ||
-            (note.description &&
-              note.description.toLowerCase().includes(query.toLowerCase())) ||
-            (Array.isArray(note.tags) &&
-              note.tags.some((tag) =>
-                tag.toLowerCase().includes(query.toLowerCase())
-              ))
-        ).length
-      : allNotesResult.length;
+
+    const totalPages = filteredNotes.length;
+    const startIndex = (page - 1) * limit;
+    const paginatedNotes = filteredNotes.slice(
+      startIndex,
+      startIndex + parseInt(limit)
+    );
 
     res.status(200).json({
-      notes,
-      page,
-      limit,
-      totalCount: filteredTotalCount,
-      lastKey: result.lastKey ? JSON.stringify(result.lastKey) : null,
-      hasMore: Boolean(result.lastKey),
+      notes: paginatedNotes,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages,
+      totalPages: Math.ceil(totalPages / limit),
+      hasMore: startIndex + limit < totalPages,
     });
   } catch (err) {
     console.error("Error in searchNotes:", err);
@@ -211,20 +194,29 @@ export const getSuggestedTags = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-// export const getNoteById = async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-//     const noteId = req.params.id;
+export const getNoteById = async (req, res) => {
+  try {
+    const noteId = req.params.noteId;
+    const note = await Note.get({ noteId: noteId });
 
-//     const note = await Note.get({ id: noteId, userId });
+    if (!note) {
+      return res.status(404).json({ error: "Note not found" });
+    }
 
-//     if (!note) {
-//       return res.status(404).json({ error: "Note not found" });
-//     }
+    res.status(200).json({ note });
+  } catch (error) {
+    console.error("Failed to fetch note:", error);
+    res.status(500).json({ error: "Failed to fetch note" });
+  }
+};
+export const deleteNote = async (req, res) => {
+  try {
+    const { noteId } = req.params;
+    await Note.delete(noteId);
 
-//     res.status(200).json({ note });
-//   } catch (error) {
-//     console.error("Failed to fetch note:", error);
-//     res.status(500).json({ error: "Failed to fetch note" });
-//   }
-// };
+    res.status(200).json({ message: "Note deleted successfully", noteId });
+  } catch (error) {
+    console.error("Error deleting note:", error);
+    res.status(500).json({ error: "Failed to delete note" });
+  }
+};

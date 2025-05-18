@@ -20,11 +20,10 @@ const noteSchema = new dynamoose.Schema(
       type: Array,
       schema: [String],
     },
-    createdAt: Date,
+  },
+  {
+    timestamps: true,
   }
-  // {
-  //   timestamps: true,
-  // }
 );
 
 const Note = dynamoose.model("Notes", noteSchema);
