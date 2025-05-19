@@ -48,8 +48,12 @@ export interface NotesGridProps {
   onEdit: (id: string | null | undefined) => void;
   onDelete: (id: string | null | undefined) => void;
 }
+export interface LastKey {
+  userId: string;
+  noteId: string;
+}
 export interface NotesResponse {
-  [x: string]: SetStateAction<{}>;
+  lastKey: LastKey;
   notes: Note[];
   totalPages: number;
 }

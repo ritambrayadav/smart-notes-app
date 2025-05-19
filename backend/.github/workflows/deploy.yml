@@ -3,7 +3,7 @@ name: Deploy to AWS Lambda
 on:
   push:
     branches:
-      - main  # or your deployment branch
+      - main # or your deployment branch
 
 jobs:
   deploy:
@@ -23,10 +23,10 @@ jobs:
           cd backend
           npm install
 
-      - name: Package backend code
+      - name: Package backend code with node_modules
         run: |
-          cd backend
-          zip -r function.zip . -x '*.git*' 'node_modules/*'
+          # From repo root, zip backend folder with node_modules inside it
+          zip -r function.zip backend -x '*.git*'
 
       - name: Deploy to AWS Lambda
         uses: appleboy/lambda-action@master
@@ -34,5 +34,5 @@ jobs:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
-          function_name: smart-notes-api  
-          zip_file: backend/function.zip
+          function_name: SmartNoteBackend
+          zip_file: function.zip

@@ -34,6 +34,7 @@ export const getNotes = async (req, res) => {
     const userId = req.params.userId;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
+    console.log(req.query.lastKey,"req.query.lastKeyreq.query.lastKey")
     let lastKey = req.query.lastKey ? JSON.parse(req.query.lastKey) : null;
 
     const totalNotesResult = await Note.query("userId")

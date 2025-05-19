@@ -36,14 +36,19 @@ export interface NoteInput {
   content: string;
   summary?: string;
 }
-export const fetchAllNotes = async (page = 1, limit = 6, lastkey: {}) => {
+export const fetchAllNotes = async (page = 1, limit = 6, lastKey: any) => {
   const dispatch = store.dispatch;
   const userId = getSessionItem("user")?.userId;
+
   try {
     dispatch(fetchNotesStart());
-    const res = await axiosInstance.get(
-      `${PATH.notes}/${userId}?page=${page}&limit=${limit}&lastKey=${lastkey}`
-    );
+    let query = `?page=${page}&limit=${limit}`;
+    if (lastKey) {
+      query += `&lastKey=${encodeURIComponent(lastKey)}`;
+    }
+
+    const url = `${PATH.notes}/${userId}${query}`;
+    const res = await axiosInstance.get(url);
 
     dispatch(fetchNotesSuccess(res.data));
   } catch (error: any) {

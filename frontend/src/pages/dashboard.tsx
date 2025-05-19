@@ -13,7 +13,7 @@ import NotesGrid from "@/components/NotesGrid";
 import PaginationControls from "@/components/PaginationControls";
 import NoNotesMessage from "@/components/NoNotesMessage";
 import LoadingNotesMessage from "@/components/LoadingNotesMessage";
-
+import { LastKey } from "@/utils/interface";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -21,7 +21,7 @@ const Dashboard = () => {
   const { user, fetchedUser } = useSelector((state: RootState) => state.auth);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [lastKey, setLastKey] = useState({});
+  const [lastKey, setLastKey] = useState<LastKey>();
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(6);
   const totalPages = Math.ceil(notes?.totalPages / limit);
@@ -31,6 +31,7 @@ const Dashboard = () => {
       if (searchQuery.trim() !== "") {
         await searchNotes(page, limit, searchQuery);
       } else {
+        console.log(lastKey, "lastKey");
         await fetchAllNotes(page, limit, lastKey);
       }
     };
