@@ -3,7 +3,7 @@ name: Deploy to AWS Lambda
 on:
   push:
     branches:
-      - main # or your deployment branch
+      - main
 
 jobs:
   deploy:
@@ -23,10 +23,10 @@ jobs:
           cd backend
           npm install
 
-      - name: Package backend code with node_modules
+      - name: Package Lambda function from backend folder
         run: |
-          # From repo root, zip backend folder with node_modules inside it
-          zip -r function.zip backend -x '*.git*'
+          cd backend
+          zip -r ../function.zip . -x '*.git*'
 
       - name: Deploy to AWS Lambda
         uses: appleboy/lambda-action@master
