@@ -1,3 +1,5 @@
+import { SetStateAction } from "react";
+
 export interface AuthPayload {
   token: string;
   user: User | null;
@@ -47,6 +49,7 @@ export interface NotesGridProps {
   onDelete: (id: string | null | undefined) => void;
 }
 export interface NotesResponse {
+  [x: string]: SetStateAction<{}>;
   notes: Note[];
   totalPages: number;
 }
