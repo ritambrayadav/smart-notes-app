@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* components/editor.css */
 .tiptap {
   min-height: 150px;
   outline: none;

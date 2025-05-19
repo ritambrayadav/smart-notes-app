@@ -34,7 +34,6 @@ export const getNotes = async (req, res) => {
     const userId = req.params.userId;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
-
     let lastKey = req.query.lastKey ? JSON.parse(req.query.lastKey) : null;
 
     const totalNotesResult = await Note.query("userId")
@@ -87,7 +86,7 @@ export const updateNote = async (req, res) => {
     note.summery = summary;
     note.tags = tags;
 
-    await note.save(); 
+    await note.save();
 
     res.status(200).json({
       message: "Note updated successfully",
@@ -102,14 +101,13 @@ export const updateNote = async (req, res) => {
 };
 
 export const searchNotes = async (req, res) => {
-  const { query, page = 1, limit = 10 } = req.query;
+  const { query, page = 1, limit = 6 } = req.query;
   const userId = req.params.userId;
 
   try {
     const allNotesResult = await Note.scan("userId").eq(userId).exec();
 
     let filteredNotes = allNotesResult;
-
     if (query) {
       const q = query.toLowerCase();
       filteredNotes = allNotesResult.filter((note) => {
@@ -121,7 +119,6 @@ export const searchNotes = async (req, res) => {
         );
       });
     }
-
     const totalPages = filteredNotes.length;
     const startIndex = (page - 1) * limit;
     const paginatedNotes = filteredNotes.slice(

@@ -21,17 +21,17 @@ const Dashboard = () => {
   const { user, fetchedUser } = useSelector((state: RootState) => state.auth);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [lastKey, setLastKey] = useState({});
   const [page, setPage] = useState<number>(1);
-  const [limit] = useState<number>(5);
+  const [limit] = useState<number>(6);
   const totalPages = Math.ceil(notes?.totalPages / limit);
-  console.log(notes, "notesss");
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.userId) return;
       if (searchQuery.trim() !== "") {
         await searchNotes(page, limit, searchQuery);
       } else {
-        await fetchAllNotes(page, limit);
+        await fetchAllNotes(page, limit, lastKey);
       }
     };
     fetchData();
@@ -50,12 +50,12 @@ const Dashboard = () => {
       fetchUser();
     }
   }, [dispatch, router, user?.userId, fetchedUser]);
-
   useEffect(() => {
     if (fetchedUser) {
+      setLastKey(notes?.lastKey);
       setShowOnboarding(!fetchedUser.hasSeenOnboarding);
     }
-  }, [fetchedUser]);
+  }, [fetchedUser, notes]);
 
   const handleOnboardingClose = async () => {
     await markOnboardingSeen();
@@ -71,7 +71,7 @@ const Dashboard = () => {
   };
   const handleDelete = async (noteId: string | null | undefined) => {
     deleteNode(noteId);
-    await fetchAllNotes(page, limit);
+    await fetchAllNotes(page, limit, lastKey);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,7 +79,6 @@ const Dashboard = () => {
     setPage(1);
   };
 
-  console.log(page, "page", notes, "notes");
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4 md:px-8">
       <div className="max-w-5xl mx-auto">

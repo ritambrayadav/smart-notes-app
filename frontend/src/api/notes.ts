@@ -36,13 +36,13 @@ export interface NoteInput {
   content: string;
   summary?: string;
 }
-export const fetchAllNotes = async (page = 1, limit = 10) => {
+export const fetchAllNotes = async (page = 1, limit = 6, lastkey) => {
   const dispatch = store.dispatch;
   const userId = getSessionItem("user")?.userId;
   try {
     dispatch(fetchNotesStart());
     const res = await axiosInstance.get(
-      `${PATH.notes}/${userId}?page=${page}&limit=${limit}`
+      `${PATH.notes}/${userId}?page=${page}&limit=${limit}&lastKey=${lastkey}`
     );
 
     dispatch(fetchNotesSuccess(res.data));
@@ -92,7 +92,7 @@ export const getNoteById = async (noteId: string) => {
     );
   }
 };
-export const searchNotes = async (page = 1, limit = 5, query: string) => {
+export const searchNotes = async (page = 1, limit = 6, query: string) => {
   const dispatch = store.dispatch;
   const userId = getSessionItem("user")?.userId;
   try {
