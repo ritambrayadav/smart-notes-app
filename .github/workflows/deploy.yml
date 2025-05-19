@@ -1,40 +1,25 @@
-name: Deploy to AWS Lambda
-
+name: Deploy Backend to AWS Lambda
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-
+          node-version: "18"
       - name: Install dependencies
         working-directory: backend
         run: npm install
-
-      - name: Package Lambda function (exclude unnecessary files)
-        working-directory: backend
+      - name: Zip backend code
         run: |
-          zip -r ../function.zip . \
-            -x "node_modules/aws-sdk/**" \
-            -x "node_modules/.bin/**" \
-            -x "node_modules/*/test/**" \
-            -x "node_modules/*/docs/**" \
-            -x ".git/**" \
-            -x "*.test.js" \
-            -x "tests/**" \
-            -x "frontend/**"
-
+          cd backend
+          zip -r ../backend-lambda.zip .
       - name: Deploy to AWS Lambda
         uses: appleboy/lambda-action@master
         with:
@@ -42,4 +27,6 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
           function_name: SmartNoteBackend
-          zip_file: function.zip
+          zip_file: backend-lambda.zip
+          handler: server.handler
+          runtime: nodejs18.x
