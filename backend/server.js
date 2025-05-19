@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import ServerlessHttp from "serverless-http";
 import authRoutes from "./routes/authRoutes.js";
 import noteRoutes from "./routes/notesRoutes.js";
 import errorHandler from "./middlewares/errorMiddleware.js";
