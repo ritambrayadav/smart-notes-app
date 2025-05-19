@@ -36,7 +36,7 @@ export interface NoteInput {
   content: string;
   summary?: string;
 }
-export const fetchAllNotes = async (page = 1, limit = 6, lastkey) => {
+export const fetchAllNotes = async (page = 1, limit = 6, lastkey: {}) => {
   const dispatch = store.dispatch;
   const userId = getSessionItem("user")?.userId;
   try {
