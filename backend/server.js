@@ -3,18 +3,23 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import serverless from "serverless-http";
-
 import authRoutes from "./routes/authRoutes.js";
 import noteRoutes from "./routes/notesRoutes.js";
 import errorHandler from "./middlewares/errorMiddleware.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
-
+app.use(cookieParser());
 app.get("/", (req, res) => {
   res.send("Backend is Running!");
 });

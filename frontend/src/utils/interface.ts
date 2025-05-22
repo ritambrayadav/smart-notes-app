@@ -1,7 +1,6 @@
 import { SetStateAction } from "react";
 
 export interface AuthPayload {
-  token: string;
   user: User | null;
 }
 export interface SignupData {
@@ -23,12 +22,10 @@ export interface LoginData {
   password: string;
 }
 export interface AuthResponse {
-  token: string;
   user: User;
 }
 export interface AuthState {
   user: User | null;
-  token: string | null;
   fetchedUser: User | null;
   loading: boolean;
   error: string | null;

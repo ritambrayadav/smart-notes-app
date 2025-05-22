@@ -4,7 +4,6 @@ import { AuthState, User, AuthPayload } from "@/utils/interface";
 
 const initialState: AuthState = {
   user: getSessionItem<User>("user"),
-  token: getSessionItem<string>("token"),
   fetchedUser: null,
   loading: false,
   error: null,
@@ -15,13 +14,11 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUser(state, action: PayloadAction<AuthPayload>) {
-      const { token, user } = action.payload;
+      const { user } = action.payload;
 
       if (user) {
         state.user = user;
-        state.token = token;
         setSessionItem("user", user);
-        setSessionItem("token", token);
       }
     },
     getUserByIdStart(state) {

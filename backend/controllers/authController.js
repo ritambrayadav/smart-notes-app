@@ -3,7 +3,10 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import { v4 as uuidv4 } from "uuid";
-
+import {
+  setHttpOnlyCookie,
+  clearHttpOnlyCookie,
+} from "../utils/HttpOnlyCookieHandler.js";
 const signup = asyncHandler(async (req, res) => {
   const { userName, email, password } = req.body;
   if (!userName || !email || !password) {
@@ -30,30 +33,24 @@ const signup = asyncHandler(async (req, res) => {
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required" });
   }
-
   const users = await User.query("email").eq(email).using("email-index").exec();
   if (users.length === 0) {
     return res.status(400).json({ message: "Invalid credentials" });
   }
-
   const user = users[0];
-
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     return res.status(400).json({ message: "Invalid credentials" });
   }
-
   const token = jwt.sign({ userId: user.userId }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "1d",
   });
-
+  setHttpOnlyCookie(res, token);
   res.status(200).json({
     message: "Login successful",
-    token,
     user: {
       userId: user.userId,
       userName: user.userName,
@@ -62,7 +59,10 @@ const login = asyncHandler(async (req, res) => {
     },
   });
 });
-
+const logout = (req, res) => {
+  clearHttpOnlyCookie(res);
+  res.status(200).json({ message: "Logged out successfully" });
+};
 const getUserById = asyncHandler(async (req, res) => {
   const { userId } = req.params;
   if (!userId || typeof userId !== "string") {
@@ -106,4 +106,4 @@ const markOnboardingSeen = async (req, res) => {
   }
 };
 
-export { signup, login, getUserById, markOnboardingSeen };
+export { signup, login, logout, getUserById, markOnboardingSeen };

@@ -7,9 +7,9 @@ import { RootState, AppDispatch } from "@/redux/store";
 import { createNewNote, updateNote, getNoteById } from "@/api/notes";
 import { fetchSuggestedTags } from "@/api/notes";
 import { clearSuggestedTags, clearSingleNote } from "@/redux/slices/notesSlice";
-import Input from "@/components/Input";
-import Button from "@/components/Button";
-import TextAreaInput from "@/components/TextAreaInput";
+import Input from "@/components/common/Input";
+import Button from "@/components/common/Button";
+import TextAreaInput from "@/components/common/TextAreaInput";
 
 function useDebounce<T>(value: T, delay = 500): T {
   const [debounced, setDebounced] = useState(value);
@@ -24,6 +24,7 @@ const CreateEditNote = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { noteId } = router.query;
+  const isEditMode = noteId && noteId !== "new";
   const { singleNote } = useSelector((state: RootState) => state.notes);
   const { suggestedTags, suggestLoading, suggestError } = useSelector(
     (state: RootState) => state.notes
@@ -38,7 +39,7 @@ const CreateEditNote = () => {
   const debouncedContent = useDebounce(form.content, 800);
   useEffect(() => {
     if (!router.isReady) return;
-    if (noteId) {
+    if (isEditMode) {
       getNoteById(noteId as string);
     } else {
       dispatch(clearSingleNote());
@@ -54,7 +55,7 @@ const CreateEditNote = () => {
   }, [router.isReady, noteId, dispatch]);
 
   useEffect(() => {
-    if (noteId && singleNote) {
+    if (isEditMode && singleNote) {
       setForm((f) => ({
         ...f,
         title: singleNote.title ?? "",
@@ -103,7 +104,7 @@ const CreateEditNote = () => {
       tags: form.tags,
     };
     try {
-      if (noteId) {
+      if (isEditMode) {
         await updateNote(noteId as string, noteData);
       } else {
         await createNewNote(noteData);
@@ -117,7 +118,7 @@ const CreateEditNote = () => {
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-semibold mb-6">
-        {noteId ? "Edit note" : "Create new note"}
+        {isEditMode ? "Edit note" : "Create new note"}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -199,7 +200,7 @@ const CreateEditNote = () => {
         </div>
         <div className="pt-4 text-right">
           <Button type="submit">
-            {noteId ? "Update Note" : "Create Note"}
+            {isEditMode ? "Update Note" : "Create Note"}
           </Button>
         </div>
       </form>

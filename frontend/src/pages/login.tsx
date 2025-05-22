@@ -4,9 +4,9 @@ import { login } from "@/api/auth";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setUser } from "@/redux/slices/authSlice";
-import Input from "@/components/Input";
-import Button from "@/components/Button";
-import LinkText from "@/components/LinkText";
+import Input from "@/components/common/Input";
+import Button from "@/components/common/Button";
+import LinkText from "@/components/common/LinkText";
 
 const Login = () => {
   const router = useRouter();
@@ -36,7 +36,7 @@ const Login = () => {
 
     try {
       const res = await login(userData);
-      dispatch(setUser({ user: res.user, token: res.token }));
+      dispatch(setUser({ user: res.user }));
       router.push("/dashboard");
     } catch (err: any) {
       console.log(err.message || "Login failed.");

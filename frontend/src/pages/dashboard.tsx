@@ -7,12 +7,12 @@ import { fetchAllNotes, searchNotes, deleteNode } from "@/api/notes";
 import { markOnboardingSeen, fetchUserByIdAndDispatch } from "@/api/auth";
 import OnboardingModal from "@/components/OnboardingModal";
 import DashboardGreeting from "@/components/DashboardGreeting";
-import NoteSearchInput from "@/components/NoteSearchInput";
-import NotesTopBar from "@/components/NotesTopBar";
-import NotesGrid from "@/components/NotesGrid";
-import PaginationControls from "@/components/PaginationControls";
-import NoNotesMessage from "@/components/NoNotesMessage";
-import LoadingNotesMessage from "@/components/LoadingNotesMessage";
+import NoteSearchInput from "@/components/notes/NoteSearchInput";
+import NotesTopBar from "@/components/notes/NotesTopBar";
+import NotesGrid from "@/components/notes/NotesGrid";
+import PaginationControls from "@/components/common/PaginationControls";
+import NoNotesMessage from "@/components/common/NoNotesMessage";
+import LoadingNotesMessage from "@/components/common/LoadingNotesMessage";
 import { LastKey } from "@/utils/interface";
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -43,7 +43,7 @@ const Dashboard = () => {
       try {
         await fetchUserByIdAndDispatch(dispatch);
       } catch {
-        router.push("/login");
+        // router.push("/login");
       }
     };
 

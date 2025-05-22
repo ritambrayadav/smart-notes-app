@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { signup } from "@/api/auth";
-import Input from "@/components/Input";
-import Button from "@/components/Button";
-import LinkText from "@/components/LinkText";
+import Input from "@/components/common/Input";
+import Button from "@/components/common/Button";
+import LinkText from "@/components/common/LinkText";
 
 const Signup = () => {
   const router = useRouter();
@@ -75,7 +75,8 @@ const Signup = () => {
         </form>
 
         <p className="text-center mt-4 text-sm">
-          Already have an account? <LinkText href="/login"> Login Here</LinkText>
+          Already have an account?{" "}
+          <LinkText href="/login"> Login Here</LinkText>
         </p>
       </div>
     </div>

@@ -1,7 +1,8 @@
 import React from "react";
-import Button from "./Button";
+import Button from "@/components/common/Button";
 import { NotesGridProps } from "@/utils/interface";
 import { FiTrash2 } from "react-icons/fi";
+import Link from "next/link";
 const NotesGrid: React.FC<NotesGridProps> = ({ notes, onEdit, onDelete }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -41,12 +42,11 @@ const NotesGrid: React.FC<NotesGridProps> = ({ notes, onEdit, onDelete }) => {
             <p className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full shadow-sm">
               {new Date(note.createdAt).toLocaleDateString()}
             </p>
-            <Button
-              onClick={() => onEdit(note.noteId)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm"
-            >
-              Edit
-            </Button>
+            <Link href={`/notes/${note.noteId}`}>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm">
+                Edit
+              </Button>
+            </Link>
           </div>
         </div>
       ))}

@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useEffect } from "react";
 import { debounce } from "lodash";
-import Input from "./Input";
+import Input from "@/components/common/Input";
 
 interface NoteSearchInputProps {
   searchQuery: string;
