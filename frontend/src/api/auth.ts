@@ -40,6 +40,15 @@ export const login = async (data: LoginData): Promise<AuthResponse> => {
     throw new Error(err?.response?.data?.message || "Login failed");
   }
 };
+export const logOut = async (): Promise<AuthResponse> => {
+  try {
+    const res = await axiosInstance.post<AuthResponse>(`${PATH.auth}/logout`);
+    return res.data;
+  } catch (error) {
+    const err = error as AxiosError<{ message: string }>;
+    throw new Error(err?.response?.data?.message || "Logout failed");
+  }
+};
 export const fetchUserByIdAndDispatch = async (dispatch: AppDispatch) => {
   const user = getSessionItem("user");
   try {

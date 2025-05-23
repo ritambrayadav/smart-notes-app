@@ -2,13 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { NotesState, NotesResponse, Note } from "@/utils/interface";
 
 const initialState: NotesState = {
-  notes: { notes: [], totalPages: 0 },
+  notes: { notes: [], totalPages: 0, lastKey: { userId: "", noteId: "" } },
   loading: false,
   error: null,
   suggestedTags: [],
   suggestLoading: false,
   suggestError: null,
-  singleNote:null,
+  singleNote: null,
 };
 
 const notesSlice = createSlice({
@@ -86,7 +86,11 @@ const notesSlice = createSlice({
       state.suggestedTags = [];
     },
     clearNotes(state) {
-      state.notes = { notes: [], totalPages: 0 };
+      state.notes = {
+        notes: [],
+        totalPages: 0,
+        lastKey: { userId: "", noteId: "" },
+      };
       state.loading = false;
       state.error = null;
     },

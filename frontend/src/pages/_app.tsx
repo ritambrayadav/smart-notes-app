@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { Provider } from "react-redux";
 import { store } from "@/redux/store";
-const AuthGuard = dynamic(() => import("@/components/AuthGaurd"), {
+const AuthGuard = dynamic(() => import("@/components/auth/AuthGaurd"), {
   ssr: false,
 });
 import { ToastContainer } from "react-toastify";

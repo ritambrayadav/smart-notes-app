@@ -1,30 +1,17 @@
-import React, { useMemo, useCallback, useEffect } from "react";
-import { debounce } from "lodash";
+"use client";
+import React, { useCallback } from "react";
 import Input from "@/components/common/Input";
-
-interface NoteSearchInputProps {
-  searchQuery: string;
-  handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
+import { NoteSearchInputProps } from "@/utils/interface";
+import { useDebouncedCallback } from "@/hooks/useDebouncehook";
 
 const NoteSearchInput: React.FC<NoteSearchInputProps> = ({
   searchQuery,
   handleSearchChange,
 }) => {
-  const debouncedChangeHandler = useMemo(
-    () => debounce(handleSearchChange, 300),
-    [handleSearchChange]
-  );
-
-  useEffect(() => {
-    return () => {
-      debouncedChangeHandler.cancel();
-    };
-  }, [debouncedChangeHandler]);
+  const debouncedChangeHandler = useDebouncedCallback(handleSearchChange, 300);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      e.persist();
       debouncedChangeHandler(e);
     },
     [debouncedChangeHandler]

@@ -1,13 +1,6 @@
 import React from "react";
 import Button from "./Button";
-
-interface PaginationControlsProps {
-  page: number;
-  totalPages: number;
-  onPrev?: () => void;
-  onNext?: () => void;
-  setPage: (page: number) => void;
-}
+import { PaginationControlsProps } from "@/utils/interface";
 
 const PaginationControls: React.FC<PaginationControlsProps> = ({
   page,

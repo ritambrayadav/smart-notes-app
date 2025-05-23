@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { JSX, useEffect } from "react";
 import { RootState } from "@/redux/store";
-import LoadingMessage from "./common/LoadingNotesMessage";
+import LoadingMessage from "@/components/common/LoadingNotesMessage";
 import { logout } from "@/utils/logout";
 
 type Props = {

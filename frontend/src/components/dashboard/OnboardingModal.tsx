@@ -1,6 +1,7 @@
 import React from "react";
-import Button from "./common/Button";
-const OnboardingModal = ({ onClose }: { onClose: () => void }) => {
+import Button from "@/components/common/Button";
+import { OnBoardingModalProps } from "@/utils/interface";
+const OnboardingModal = ({ onClose }: OnBoardingModalProps) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">

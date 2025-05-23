@@ -1,15 +1,12 @@
 import React from "react";
 import Button from "@/components/common/Button";
-import Link from "next/link";
-interface NotesTopBarProps {
-  handleCreateNote: () => void;
-}
+import LinkText from "../common/LinkText";
 
-const NotesTopBar: React.FC<NotesTopBarProps> = ({ handleCreateNote }) => (
+const NotesTopBar = () => (
   <div className="flex items-center justify-between mb-6">
-    <Link href="/notes/new">
-      <Button onClick={handleCreateNote}>+ Create Note</Button>
-    </Link>
+    <LinkText href="/notes/new">
+      <Button>+ Create Note</Button>
+    </LinkText>
   </div>
 );
 

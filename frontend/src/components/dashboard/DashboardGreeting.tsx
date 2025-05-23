@@ -1,10 +1,7 @@
 import React from "react";
 import { FiUser } from "react-icons/fi";
 import { BsLightbulb } from "react-icons/bs";
-
-interface DashboardGreetingProps {
-  userName?: string;
-}
+import { DashboardGreetingProps } from "@/utils/interface";
 
 const DashboardGreeting: React.FC<DashboardGreetingProps> = ({ userName }) => (
   <header className="w-full bg-white border border-gray-200 rounded-xl px-6 py-3 flex items-center justify-between shadow-sm">
