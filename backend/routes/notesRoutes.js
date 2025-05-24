@@ -14,12 +14,14 @@ import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 router.use(authMiddleware);
+
 router.post("/generate-summary", generateSummary);
 router.post("/suggest-tags", getSuggestedTags);
-router.put("/:noteId", updateNote);
 router.get("/search/:userId", searchNotes);
 router.get("/get-note/:noteId", getNoteById);
-router.post("/:userId", createNote);
-router.get("/:userId", getNotes);
+router.put("/:noteId", updateNote);
 router.delete("/:noteId", deleteNote);
+router.post("/user/:userId", createNote);
+router.get("/user/:userId", getNotes);
+
 export default router;
