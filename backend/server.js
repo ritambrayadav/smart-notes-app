@@ -30,8 +30,6 @@ const corsOptions = {
   allowedHeaders: [
     "Content-Type",
     "Authorization",
-    "X-Requested-With",
-    "Accept",
   ],
 };
 
@@ -50,8 +48,8 @@ app.get("/", (req, res) => {
   res.send("Backend is Running!");
 });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/notes", noteRoutes);
+app.use("/default/api/auth", authRoutes);
+app.use("/default/api/notes", noteRoutes);
 
 app.use(errorHandler);
 

@@ -47,7 +47,7 @@ export const fetchAllNotes = async (page = 1, limit = 6, lastKey: any) => {
       query += `&lastKey=${encodeURIComponent(lastKey)}`;
     }
 
-    const url = `${PATH.notes}/${userId}${query}`;
+    const url = `${PATH.notes}/user/${userId}${query}`;
     const res = await axiosInstance.get(url);
 
     dispatch(fetchNotesSuccess(res.data));
@@ -63,7 +63,7 @@ export const createNewNote = async (noteData: NoteInput) => {
   const dispatch = store.dispatch;
 
   try {
-    const res = await axiosInstance.post(`${PATH.notes}/${userId}`, {
+    const res = await axiosInstance.post(`${PATH.notes}/user/${userId}`, {
       userId,
       ...noteData,
     });
