@@ -13,7 +13,6 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://localhost:3000",
   "https://smart-notes-app-ki3d.vercel.app",
 ];
 
