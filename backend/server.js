@@ -26,10 +26,23 @@ app.use(cors({
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+}));
+
+app.options('*', cors({
+  origin: allowedOrigins,
+  credentials: true,
 }));
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
+  next();
+});
 
 app.get('/', (req, res) => {
   res.send('Backend is Running!');
