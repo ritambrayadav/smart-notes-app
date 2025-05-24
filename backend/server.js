@@ -29,7 +29,13 @@ app.use(
     credentials: true,
   })
 );
-
+app.options(
+  "*",
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.get("/", (req, res) => {
