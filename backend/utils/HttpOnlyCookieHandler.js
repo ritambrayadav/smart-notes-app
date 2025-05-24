@@ -1,7 +1,7 @@
 import { serialize } from "cookie";
 
 export const setHttpOnlyCookie = (res, token) => {
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = process.env.NODE_ENV === "default";
 
   res.cookie("token", token, {
     httpOnly: true,
@@ -14,7 +14,7 @@ export const setHttpOnlyCookie = (res, token) => {
 export const clearHttpOnlyCookie = (res) => {
   const cookie = serialize("token", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "default",
     sameSite: "lax",
     path: "/",
     expires: new Date(0),
