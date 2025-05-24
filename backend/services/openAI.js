@@ -48,17 +48,17 @@ export const generateSummaryFromContent = async (content) => {
       return summary;
     } catch (error) {
       const status = error.response?.status;
-      if (status === 429 || status === 503) {
-        const delay = Math.pow(2, retryCount) * 1000;
-        console.warn(
-          `Rate limited or model loading. Retrying in ${delay / 1000}s...`
-        );
-        await new Promise((res) => setTimeout(res, delay));
-        retryCount++;
-      } else {
-        console.error("Error from Hugging Face:", error.message);
-        throw error;
-      }
+      // if (status === 429 || status === 503) {
+      //   const delay = Math.pow(2, retryCount) * 1000;
+      //   console.warn(
+      //     `Rate limited or model loading. Retrying in ${delay / 1000}s...`
+      //   );
+      //   await new Promise((res) => setTimeout(res, delay));
+      //   retryCount++;
+      // } else {
+      //   console.error("Error from Hugging Face:", error.message);
+      //   throw error;
+      // }
     }
   }
 
