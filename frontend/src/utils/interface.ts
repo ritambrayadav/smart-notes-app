@@ -45,6 +45,7 @@ export interface NotesGridProps {
 export interface LastKey {
   userId: string;
   noteId: string;
+  createdAt: string;
 }
 export interface NotesResponse {
   lastKey: LastKey;
@@ -61,6 +62,8 @@ export interface NotesState {
   singleNote?: Note | null;
   singleNoteLoading?: boolean;
   singleNoteError?: string | null;
+  isSubmitting: boolean;
+  submitError: string | null;
 }
 export interface DashboardGreetingProps {
   userName?: string;

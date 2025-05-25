@@ -16,6 +16,7 @@ import { LastKey } from "@/utils/interface";
 import Button from "../common/Button";
 import { logout } from "@/utils/logout";
 import { FiLogOut } from "react-icons/fi";
+import { last } from "lodash";
 
 const DashboardContainer = () => {
   const dispatch = useDispatch();
@@ -24,35 +25,65 @@ const DashboardContainer = () => {
   const { user, fetchedUser } = useSelector((state: RootState) => state.auth);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [lastKey, setLastKey] = useState<LastKey>();
+  const [lastKeys, setLastKeys] = useState<{ [page: number]: LastKey | null }>({
+    1: null,
+  });
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(6);
   const totalPages: number = Math.ceil(notes?.totalPages / limit);
 
+  const fetchData = async () => {
+    const keyForPage = lastKeys[page] || null;
+    let response;
+    if (searchQuery.trim() !== "") {
+      await searchNotes(page, limit, searchQuery);
+      return;
+    } else {
+      response = await fetchAllNotes(page, limit, JSON.stringify(keyForPage));
+    }
+    const newLastKey =
+      typeof response?.lastKey === "string"
+        ? JSON.parse(response.lastKey)
+        : response?.lastKey;
+    if (
+      newLastKey?.userId &&
+      newLastKey?.noteId &&
+      !Object.prototype.hasOwnProperty.call(lastKeys, page + 1)
+    ) {
+      setLastKeys((prev) => ({
+        ...prev,
+        [page + 1]: newLastKey,
+      }));
+    }
+  };
+
   useEffect(() => {
-    if (!user?.userId) return;
-    const fetchData = async () => {
-      if (searchQuery.trim() !== "") {
-        await searchNotes(page, limit, searchQuery);
-      } else {
-        await fetchAllNotes(page, limit, lastKey);
-      }
-    };
+    if (!user?.userId || !fetchedUser) return;
+
+    const shouldFetch =
+      page === 1 || Object.prototype.hasOwnProperty.call(lastKeys, page);
+
+    if (!shouldFetch) {
+      return;
+    }
+
     fetchData();
-  }, [dispatch, page, limit, searchQuery, user?.userId]);
+  }, [page, lastKeys, searchQuery, user?.userId, fetchedUser]);
 
   useEffect(() => {
     if (!fetchedUser && user?.userId) {
-      fetchUserByIdAndDispatch(dispatch).catch(() => router.push("/login"));
+      fetchUserByIdAndDispatch(dispatch);
     }
-  }, [dispatch, router, user?.userId, fetchedUser]);
+  }, [dispatch, router, user?.userId, showOnboarding]);
 
   useEffect(() => {
     if (fetchedUser) {
-      setLastKey(notes?.lastKey);
-      setShowOnboarding(!fetchedUser.hasSeenOnboarding);
+      setShowOnboarding((prev) => {
+        if (prev !== undefined) return prev;
+        return !fetchedUser.hasSeenOnboarding;
+      });
     }
-  }, [fetchedUser, notes]);
+  }, [fetchedUser]);
 
   const handleOnboardingClose = async () => {
     await markOnboardingSeen();
@@ -61,14 +92,15 @@ const DashboardContainer = () => {
 
   const handleDelete = async (noteId: string | null | undefined) => {
     await deleteNode(noteId);
-    await fetchAllNotes(page, limit, lastKey);
+    const keyForPage = lastKeys[page] || null;
+    await fetchAllNotes(page, limit, keyForPage);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setPage(1);
+    setLastKeys({ 1: null });
   };
-
   return (
     <>
       {showOnboarding && <OnboardingModal onClose={handleOnboardingClose} />}

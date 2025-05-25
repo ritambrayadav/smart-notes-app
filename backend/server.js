@@ -36,12 +36,6 @@ app.use(cors(corsOptions));
 
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
-  console.log("Headers:", req.headers);
-  console.log("Body:", req.body);
-  next();
-});
 
 app.get("/", (req, res) => {
   res.send("Backend is Running!");

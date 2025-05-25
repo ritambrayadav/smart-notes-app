@@ -23,8 +23,14 @@ const NoteForm = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { noteId } = router.query;
   const isEditMode = noteId && noteId !== "new";
-  const { singleNote, suggestedTags, suggestLoading, suggestError } =
-    useSelector((state: RootState) => state.notes);
+  const {
+    singleNote,
+    suggestedTags,
+    suggestLoading,
+    suggestError,
+    submitError,
+    isSubmitting,
+  } = useSelector((state: RootState) => state.notes);
 
   const [form, setForm] = useState({
     title: "",
@@ -129,9 +135,7 @@ const NoteForm = () => {
           onInputChange={(val) => handleChange("tagInput", val)}
           onAddTag={handleAddTag}
         />
-
         <TagList tags={form.tags} onRemoveTag={handleRemoveTag} />
-
         <SuggestedTags
           suggestedTags={suggestedTags}
           suggestLoading={suggestLoading}
@@ -140,8 +144,14 @@ const NoteForm = () => {
         />
 
         <div className="pt-4 text-right">
-          <Button type="submit">
-            {isEditMode ? "Update Note" : "Create Note"}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting
+              ? isEditMode
+                ? "Updating..."
+                : "Creating..."
+              : isEditMode
+              ? "Update Note"
+              : "Create Note"}{" "}
           </Button>
         </div>
       </form>

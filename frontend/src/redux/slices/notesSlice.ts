@@ -2,13 +2,23 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { NotesState, NotesResponse, Note } from "@/utils/interface";
 
 const initialState: NotesState = {
-  notes: { notes: [], totalPages: 0, lastKey: { userId: "", noteId: "" } },
+  notes: {
+    notes: [],
+    totalPages: 0,
+    lastKey: {
+      userId: "",
+      noteId: "",
+      createdAt: "",
+    },
+  },
   loading: false,
   error: null,
   suggestedTags: [],
   suggestLoading: false,
   suggestError: null,
   singleNote: null,
+  isSubmitting: false,
+  submitError: null,
 };
 
 const notesSlice = createSlice({
@@ -30,10 +40,21 @@ const notesSlice = createSlice({
     addNote(state, action: PayloadAction<Note>) {
       state.notes.notes.unshift(action.payload);
     },
-    updateNote(state, action: PayloadAction<Note>) {
+    updateNoteById(state, action: PayloadAction<Note>) {
       state.notes.notes = state.notes.notes.map((note) =>
         note.noteId === action.payload.noteId ? action.payload : note
       );
+    },
+    submitNoteStart(state) {
+      state.isSubmitting = true;
+      state.submitError = null;
+    },
+    submitNoteSuccess(state) {
+      state.isSubmitting = false;
+    },
+    submitNoteFailure(state, action: PayloadAction<string>) {
+      state.isSubmitting = false;
+      state.submitError = action.payload;
     },
     deleteNote(state, action: PayloadAction<string>) {
       state.notes.notes = state.notes.notes.filter(
@@ -89,7 +110,7 @@ const notesSlice = createSlice({
       state.notes = {
         notes: [],
         totalPages: 0,
-        lastKey: { userId: "", noteId: "" },
+        lastKey: { userId: "", noteId: "", createdAt: "" },
       };
       state.loading = false;
       state.error = null;
@@ -102,7 +123,7 @@ export const {
   fetchNotesSuccess,
   fetchNotesFailure,
   addNote,
-  updateNote,
+  updateNoteById,
   deleteNote,
   clearNotes,
   searchNotesStart,
@@ -116,6 +137,9 @@ export const {
   getNoteSuccess,
   getNoteFailure,
   clearSingleNote,
+  submitNoteStart,
+  submitNoteSuccess,
+  submitNoteFailure,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

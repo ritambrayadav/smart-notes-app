@@ -6,7 +6,8 @@ export const createNote = async (req, res) => {
   try {
     const { title, content, tags = [] } = req.body;
     const userId = req.params.userId;
-
+    const createdAt = new Date().toISOString(); // Ensures it's a string
+    const updatedAt = createdAt;
     // Basic validation
     // if (!title || !content) {
     //   return res.status(400).json({ error: "Title and content are required." });
@@ -20,6 +21,8 @@ export const createNote = async (req, res) => {
       content,
       summery,
       tags: tags.length > 0 ? tags : [],
+      createdAt,
+      updatedAt,
     });
 
     return res.status(201).json({ note: newNote });
@@ -32,20 +35,19 @@ export const createNote = async (req, res) => {
 export const getNotes = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     let lastKey = req.query.lastKey ? JSON.parse(req.query.lastKey) : null;
 
     const totalNotesResult = await Note.query("userId")
       .eq(userId)
-      .using("userId-index")
+      .using("userId-createdAt-index")
       .count()
       .exec();
     const totalPages = totalNotesResult.count;
 
     let query = Note.query("userId")
       .eq(userId)
-      .using("userId-index")
+      .using("userId-createdAt-index")
       .sort("descending")
       .limit(limit);
 
@@ -57,7 +59,6 @@ export const getNotes = async (req, res) => {
 
     res.status(200).json({
       notes: result,
-      page,
       limit,
       totalPages,
       lastKey: result.lastKey ? JSON.stringify(result.lastKey) : null,
@@ -68,12 +69,11 @@ export const getNotes = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch notes" });
   }
 };
-
 export const updateNote = async (req, res) => {
   try {
     const noteId = req.params.noteId;
     const { title, content, tags } = req.body;
-
+    const updatedAt = new Date().toISOString();
     const summary = await generateSummaryFromContent(content);
 
     const note = await Note.get(noteId);
@@ -85,6 +85,7 @@ export const updateNote = async (req, res) => {
     note.content = content;
     note.summery = summary;
     note.tags = tags;
+    note.updatedAt = updatedAt;
 
     await note.save();
 
