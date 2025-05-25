@@ -21,7 +21,7 @@ const TagInput = ({ tagInput, onInputChange, onAddTag }: TagsProps) => {
           onKeyDown={handleKeyDown}
           className="flex-1"
         />
-        <Button type="button" onClick={onAddTag}>
+        <Button type="button" onClick={() => onAddTag()}>
           Add
         </Button>
       </div>
